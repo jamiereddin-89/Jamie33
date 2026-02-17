@@ -444,3 +444,84 @@ header {
     margin-right: 6px;
     animation: pulse-red 1s infinite;
 }
+
+/* Expanded Biometrics Grid */
+.biometrics-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+
+@media (max-width: 400px) {
+    .biometrics-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.mini-stat-box {
+    background: var(--surface-variant);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-sm);
+    padding: 12px 4px;
+    text-align: center;
+    transition: border-color 0.3s;
+}
+
+.mini-stat-box:hover {
+    border-color: var(--accent-cyan);
+}
+
+.mini-stat-box .val {
+    display: block;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.mini-stat-box .lbl {
+    font-size: 0.5rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+}
+
+/* Timeline specific refinements */
+.timeline-item {
+    margin-bottom: 20px;
+}
+
+.time-content {
+    font-size: 0.8rem;
+    line-height: 1.4;
+    color: var(--text-primary);
+}
+
+/* Section labels refinement */
+.section-label {
+    border-left: 3px solid var(--accent-cyan);
+    padding-left: 10px;
+    background: linear-gradient(90deg, rgba(144, 213, 255, 0.1), transparent);
+}
+
+/* Badges for astronomical */
+.badge-stone {
+    background: #313331;
+    font-size: 0.55rem;
+    padding: 4px 8px;
+    border-radius: 4px;
+    color: var(--text-secondary);
+    border: 1px solid #444;
+}
+
+/* Custom Scrollbar for the app */
+::-webkit-scrollbar {
+    width: 4px;
+}
+::-webkit-scrollbar-track {
+    background: var(--bg-color);
+}
+::-webkit-scrollbar-thumb {
+    background: var(--surface-variant);
+    border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-cyan);
+}
