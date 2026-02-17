@@ -1,6 +1,8 @@
 const state = {
     user: { name: '', dob: '', country: '', profilePic: '', gender: '' },
-    settings: { sections: ['realtime', 'facts', 'livedthrough', 'top', 'astronomical', 'economic', 'biological', 'standing', 'tech', 'transit'] },
+    settings: {
+        sections: ['realtime', 'facts', 'livedthrough', 'top', 'biological', 'standing', 'astronomical', 'transit', 'economic', 'tech']
+    },
     isPuterSignedIn: false
 };
 
@@ -142,6 +144,31 @@ function createCollapsibleSection(label, isCollapsed = true) {
     return { container, content };
 }
 
+function createCollapsibleSubSection(label, isCollapsed = true) {
+    const container = document.createElement('div');
+    container.style.marginTop = '12px';
+
+    const header = document.createElement('div');
+    header.className = 'sub-label';
+    header.style.cursor = 'pointer';
+    header.style.display = 'flex';
+    header.style.justifyContent = 'space-between';
+    header.style.color = 'var(--accent-amber)';
+    header.innerHTML = `<span>${label}</span> <span class="sub-toggle-arrow">${isCollapsed ? '[+]' : '[-]'}</span>`;
+
+    const content = document.createElement('div');
+    content.className = isCollapsed ? 'hidden' : '';
+
+    header.addEventListener('click', () => {
+        const hidden = content.classList.toggle('hidden');
+        header.querySelector('.sub-toggle-arrow').textContent = hidden ? '[+]' : '[-]';
+    });
+
+    container.appendChild(header);
+    container.appendChild(content);
+    return { container, content };
+}
+
 // --- Main Results Renderer ---
 
 function renderResults() {
@@ -162,148 +189,25 @@ function renderResults() {
     `;
     elements.resultsSection.appendChild(profile);
 
-    // 2. Real Time Biometrics
-    if (sections.includes('realtime')) {
-        const { container, content } = createCollapsibleSection('BIOMETRICS STREAM', false);
-        const card = document.createElement('div');
-        card.className = 'card';
-        card.innerHTML = `
-            <div class="biometrics-main">
-                <div class="stream-label"><span>Total Seconds Elapsed</span> <span class="live-feed-text">LIVE_FEED</span></div>
-                <div class="large-value" id="val-seconds">-</div>
-            </div>
-            <div class="biometrics-grid">
-                <div class="mini-stat-box"><span class="val" id="val-years">-</span><span class="lbl">YRS</span></div>
-                <div class="mini-stat-box"><span class="val" id="val-months">-</span><span class="lbl">MOS</span></div>
-                <div class="mini-stat-box"><span class="val" id="val-weeks">-</span><span class="lbl">WKS</span></div>
-                <div class="mini-stat-box"><span class="val" id="val-days">-</span><span class="lbl">DAYS</span></div>
-                <div class="mini-stat-box"><span class="val" id="val-hours">-</span><span class="lbl">HRS</span></div>
-                <div class="mini-stat-box"><span class="val" id="val-minutes">-</span><span class="lbl">MINS</span></div>
-                <div class="mini-stat-box" style="grid-column: span 2; border-color: var(--accent-amber);"><span class="val" id="val-born-day" style="font-size: 0.8rem; color: var(--accent-amber)">-</span><span class="lbl">DAY BORN</span></div>
-            </div>
-        `;
-        content.appendChild(card);
+    const orderedKeys = ['realtime', 'facts', 'livedthrough', 'top', 'biological', 'standing', 'astronomical', 'transit', 'economic', 'tech'];
 
-        const grid = document.createElement('div');
-        grid.className = 'stats-2x2';
-        grid.style.marginTop = '12px';
-        grid.innerHTML = `
-            <div class="grid-item"><div class="lbl">HEARTBEATS</div><div class="val" id="est-heart">-</div></div>
-            <div class="grid-item"><div class="lbl">BREATHS</div><div class="val" id="est-breaths">-</div></div>
-            <div class="grid-item"><div class="lbl">HOURS ASLEEP</div><div class="val" id="est-sleep">-</div><span class="unit">EST</span></div>
-            <div class="grid-item"><div class="lbl">HOURS CONSUMING</div><div class="val" id="est-eat">-</div><span class="unit">EST</span></div>
-            <div class="grid-item"><div class="lbl">WORDS SPOKEN</div><div class="val" id="est-words">-</div><span class="unit">EST</span></div>
-            <div class="grid-item"><div class="lbl">WATER CONSUMED</div><div class="val" id="est-water">-</div><span class="unit">LITERS</span></div>
-        `;
-        content.appendChild(grid);
-        elements.resultsSection.appendChild(container);
-    }
+    orderedKeys.forEach(key => {
+        if (sections.includes(key)) {
+            switch(key) {
+                case 'realtime': renderLiveStats(); break;
+                case 'facts': renderNameFacts(); break;
+                case 'livedthrough': renderEventsLived(); break;
+                case 'top': renderTopMedia(); break;
+                case 'biological': renderBodyFacts(); break;
+                case 'standing': renderGlobalStanding(); break;
+                case 'astronomical': renderStarFacts(); break;
+                case 'transit': renderEarthFacts(); break;
+                case 'economic': renderEconomyFacts(); break;
+                case 'tech': renderTechFacts(); break;
+            }
+        }
+    });
 
-    // 3. Demographic Facts
-    if (sections.includes('facts')) {
-        const { container, content } = createCollapsibleSection('DEMOGRAPHIC ANALYSIS');
-        const age = calculateAge(state.user.dob).years;
-        const country = state.user.country || 'Global';
-        const list = document.createElement('div');
-        list.className = 'data-list';
-        list.innerHTML = `
-            <div class="list-item"><div class="item-num">01</div><div class="item-main"><div class="item-title">Global Pop. @ Birth</div></div><div class="item-val">~${(8.1 - (age * 0.085)).toFixed(1)}B</div></div>
-            <div class="list-item"><div class="item-num">02</div><div class="item-main"><div class="item-title">People Older</div></div><div class="item-val">~${(4.5 - (age * 0.05)).toFixed(1)}B</div></div>
-            <div class="list-item"><div class="item-num">03</div><div class="item-main"><div class="item-title">Name Frequency (${country})</div></div><div class="item-val">~1/2,500</div></div>
-            <div class="list-item"><div class="item-num">04</div><div class="item-main"><div class="item-title">Born Same Day</div></div><div class="item-val">~365k</div></div>
-            <div class="list-item"><div class="item-num">05</div><div class="item-main"><div class="item-title">Name Popularity (Birth)</div></div><div class="item-val">#${(state.user.name.length * 7 % 100) + 1}</div></div>
-            <div class="list-item"><div class="item-num">06</div><div class="item-main"><div class="item-title">Name Popularity (Now)</div></div><div class="item-val">#${(state.user.name.length * 13 % 500) + 50}</div></div>
-        `;
-        content.appendChild(list);
-        elements.resultsSection.appendChild(container);
-    }
-
-    // New Sections
-    if (sections.includes('economic')) renderEconomicPulse();
-    if (sections.includes('biological')) renderBiologicalMilestones();
-    if (sections.includes('standing')) renderGlobalStanding();
-    if (sections.includes('tech')) renderTechnologicalEra();
-    if (sections.includes('transit')) renderEarthTransit();
-
-    // 4. Critical Events Log
-    if (sections.includes('livedthrough')) {
-        const { container, content } = createCollapsibleSection('CRITICAL EVENTS LOG');
-        const card = document.createElement('div');
-        card.className = 'card';
-        card.innerHTML = `
-            <div class="item-subtitle" style="margin-bottom:12px; display:flex; justify-content:space-between"><span>SOURCE: GLOBAL_HISTORY_DB</span></div>
-            <div class="sub-label" style="color:var(--accent-amber); margin: 12px 0 8px;">HISTORICAL TIMELINE (20 EVENTS)</div>
-            <div class="timeline" id="timeline-hist" style="margin-bottom: 24px;"></div>
-            <div class="sub-label" style="color:var(--accent-amber); margin: 12px 0 8px;">ONCE-IN-A-LIFETIME EVENTS</div>
-            <div class="data-list" id="timeline-once" style="margin: 0; border-radius: 8px;"></div>
-            <div class="sub-label" style="color:var(--accent-amber); margin: 24px 0 8px;">POSITIVE HUMAN PROGRESS</div>
-            <div class="data-list" id="timeline-pos" style="margin: 0; border-radius: 8px;"></div>
-            <div class="sub-label" style="color:var(--accent-amber); margin: 24px 0 8px;">TECHNOLOGICAL INVENTIONS</div>
-            <div class="data-list" id="timeline-inv" style="margin: 0; border-radius: 8px;"></div>
-        `;
-        content.appendChild(card);
-        elements.resultsSection.appendChild(container);
-        renderLivedThroughData();
-    }
-
-    // 5. Cultural Archive
-    if (sections.includes('top')) {
-        const { container, content } = createCollapsibleSection('CULTURAL ARCHIVE');
-        const card = document.createElement('div');
-        card.className = 'card';
-        card.innerHTML = `
-            <div class="sub-label" style="color:#ff7043">#1 CHART HIT (BIRTH DAY)</div>
-            <div style="font-size:1.4rem; margin:8px 0; color:var(--accent-amber)">Smooth</div>
-            <div class="item-subtitle">Santana ft. Rob Thomas</div>
-            <div class="sub-label" style="margin-top: 16px;">TOP 10 TRACKS THAT WEEK</div>
-            <div class="data-list" id="top-songs" style="margin: 8px 0; border-radius: 8px;"></div>
-
-            <hr style="border:0; border-top:1px solid var(--border-color); margin: 24px 0;">
-            <div class="sub-label" style="color:#ff7043">#1 TV BROADCAST</div>
-            <div style="font-size:1.2rem; margin:8px 0; color:var(--accent-amber)">Friends</div>
-            <div class="sub-label" style="margin-top: 16px;">TOP 10 SHOWS THIS SEASON</div>
-            <div class="data-list" id="top-tv" style="margin: 8px 0; border-radius: 8px;"></div>
-
-            <hr style="border:0; border-top:1px solid var(--border-color); margin: 24px 0;">
-            <div class="sub-label" style="color:#ff7043">#1 CINEMA RELEASE</div>
-            <div style="font-size:1.2rem; margin:8px 0; color:var(--accent-amber)">Toy Story 2</div>
-            <div class="sub-label" style="margin-top: 16px;">TOP 5 BOX OFFICE HITS</div>
-            <div class="data-list" id="top-movies" style="margin: 8px 0; border-radius: 8px;"></div>
-        `;
-        content.appendChild(card);
-        elements.resultsSection.appendChild(container);
-        renderTopChartsData();
-    }
-
-    // 6. Stellar Alignment
-    if (sections.includes('astronomical')) {
-        const { container, content } = createCollapsibleSection('STELLAR ALIGNMENT');
-        const zodiac = getZodiac(new Date(state.user.dob));
-        const age = calculateAge(state.user.dob).years;
-        const card = document.createElement('div');
-        card.className = 'card';
-        card.style.position = 'relative';
-        card.style.overflow = 'hidden';
-        card.innerHTML = `
-            <div class="stellar-title" style="font-size: 2rem;">${zodiac.sign.toUpperCase()}</div>
-            <div class="item-subtitle" style="margin: 8px 0 16px; color: var(--accent-purple); font-weight: 600;">${zodiac.meaning}</div>
-            <div style="display: flex; gap: 8px; margin-bottom: 16px;">
-                <span class="badge-stone">BIRTHSTONE: DIAMOND</span>
-                <span class="badge-stone" style="background: rgba(179, 157, 219, 0.1); color: var(--accent-purple);">ELEMENT: ${zodiac.element.toUpperCase()}</span>
-            </div>
-            <div class="item-subtitle">STONE MEANING: SYMBOL OF ETERNAL LOVE AND INNER STRENGTH.</div>
-            <hr style="border:0; border-top:1px solid var(--border-color); margin: 16px 0;">
-            <div class="data-list" style="margin: 0; border: none; background: transparent;">
-                <div class="list-item" style="padding: 8px 0; border-color: #222;"><div class="item-main"><div class="item-title">Light Travel Distance</div></div><div class="item-val">${age} LY</div></div>
-                <div class="list-item" style="padding: 8px 0; border: none;"><div class="item-main"><div class="item-title">Moon Phase</div></div><div class="item-val">Waning Gibbous</div></div>
-            </div>
-            <div style="opacity:0.05; font-size:5rem; position:absolute; bottom:-10px; right:-10px;">✨</div>
-        `;
-        content.appendChild(card);
-        elements.resultsSection.appendChild(container);
-    }
-
-    // 7. Footer
     const footer = document.createElement('div');
     footer.className = 'footer-actions';
     footer.innerHTML = `<button class="reinit-btn" onclick="location.reload()"><span>🔄</span> NEW ANALYSIS</button>`;
@@ -312,34 +216,128 @@ function renderResults() {
     startLiveUpdates();
 }
 
-// --- New Rendering Functions ---
+// --- Section Renderers ---
 
-function renderEconomicPulse() {
-    const { container, content } = createCollapsibleSection('ECONOMIC PULSE');
+function renderLiveStats() {
+    const { container, content } = createCollapsibleSection('LIVE STATS', false);
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+        <div class="biometrics-main">
+            <div class="stream-label"><span>Total Seconds Elapsed</span> <span class="live-feed-text">LIVE_FEED</span></div>
+            <div class="large-value" id="val-seconds">-</div>
+        </div>
+        <div class="biometrics-grid">
+            <div class="mini-stat-box"><span class="val" id="val-years">-</span><span class="lbl">YRS</span></div>
+            <div class="mini-stat-box"><span class="val" id="val-months">-</span><span class="lbl">MOS</span></div>
+            <div class="mini-stat-box"><span class="val" id="val-weeks">-</span><span class="lbl">WKS</span></div>
+            <div class="mini-stat-box"><span class="val" id="val-days">-</span><span class="lbl">DAYS</span></div>
+            <div class="mini-stat-box"><span class="val" id="val-hours">-</span><span class="lbl">HRS</span></div>
+            <div class="mini-stat-box"><span class="val" id="val-minutes">-</span><span class="lbl">MINS</span></div>
+            <div class="mini-stat-box" style="grid-column: span 2; border-color: var(--accent-amber);"><span class="val" id="val-born-day" style="font-size: 0.8rem; color: var(--accent-amber)">-</span><span class="lbl">DAY BORN</span></div>
+        </div>
+    `;
+    content.appendChild(card);
+
+    const grid = document.createElement('div');
+    grid.className = 'stats-2x2';
+    grid.style.marginTop = '12px';
+    grid.innerHTML = `
+        <div class="grid-item"><div class="lbl">HEARTBEATS</div><div class="val" id="est-heart">-</div></div>
+        <div class="grid-item"><div class="lbl">BREATHS</div><div class="val" id="est-breaths">-</div></div>
+        <div class="grid-item"><div class="lbl">HOURS ASLEEP</div><div class="val" id="est-sleep">-</div><span class="unit">EST</span></div>
+        <div class="grid-item"><div class="lbl">HOURS CONSUMING</div><div class="val" id="est-eat">-</div><span class="unit">EST</span></div>
+    `;
+    content.appendChild(grid);
+    elements.resultsSection.appendChild(container);
+}
+
+function renderNameFacts() {
+    const { container, content } = createCollapsibleSection('NAME FACTS');
     const age = calculateAge(state.user.dob).years;
-    const inflationFactor = Math.pow(1.03, age).toFixed(2);
+    const country = state.user.country || 'Global';
     const list = document.createElement('div');
     list.className = 'data-list';
     list.innerHTML = `
-        <div class="list-item"><div class="item-num">01</div><div class="item-main"><div class="item-title">Inflation Multiplier</div></div><div class="item-val">${inflationFactor}x</div></div>
-        <div class="list-item"><div class="item-num">02</div><div class="item-main"><div class="item-title">$1.00 then is worth</div></div><div class="item-val">$${inflationFactor} today</div></div>
-        <div class="list-item"><div class="item-num">03</div><div class="item-main"><div class="item-title">Avg. Milk Price then</div></div><div class="item-val">$${(2.50 / inflationFactor).toFixed(2)}</div></div>
-        <div class="list-item"><div class="item-num">04</div><div class="item-main"><div class="item-title">Avg. Gas Price then</div></div><div class="item-val">$${(3.50 / inflationFactor).toFixed(2)}</div></div>
+        <div class="list-item"><div class="item-num">01</div><div class="item-main"><div class="item-title">Global Pop. @ Birth</div></div><div class="item-val">~${(8.1 - (age * 0.085)).toFixed(1)}B</div></div>
+        <div class="list-item"><div class="item-num">02</div><div class="item-main"><div class="item-title">People Older</div></div><div class="item-val">~${(4.5 - (age * 0.05)).toFixed(1)}B</div></div>
+        <div class="list-item"><div class="item-num">03</div><div class="item-main"><div class="item-title">Name Frequency (${country})</div></div><div class="item-val">~1/2,500</div></div>
+        <div class="list-item"><div class="item-num">04</div><div class="item-main"><div class="item-title">Born Same Day</div></div><div class="item-val">~365k</div></div>
+        <div class="list-item"><div class="item-num">05</div><div class="item-main"><div class="item-title">Name Popularity (Birth)</div></div><div class="item-val">#${(state.user.name.length * 7 % 100) + 1}</div></div>
+        <div class="list-item"><div class="item-num">06</div><div class="item-main"><div class="item-title">Name Popularity (Now)</div></div><div class="item-val">#${(state.user.name.length * 13 % 500) + 50}</div></div>
     `;
     content.appendChild(list);
     elements.resultsSection.appendChild(container);
 }
 
-function renderBiologicalMilestones() {
-    const { container, content } = createCollapsibleSection('BIO MILESTONES');
+function renderEventsLived() {
+    const { container, content } = createCollapsibleSection('EVENTS LIVED');
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `<div class="item-subtitle" style="margin-bottom:12px;">SOURCE: GLOBAL_HISTORY_DB</div>`;
+
+    const subHist = createCollapsibleSubSection('HISTORICAL TIMELINE (20 EVENTS)', false);
+    subHist.content.id = 'timeline-hist';
+    subHist.content.className = 'timeline';
+
+    const subOnce = createCollapsibleSubSection('ONCE-IN-A-LIFETIME EVENTS');
+    subOnce.content.id = 'timeline-once';
+    subOnce.content.className = 'data-list';
+
+    const subPos = createCollapsibleSubSection('POSITIVE HUMAN PROGRESS');
+    subPos.content.id = 'timeline-pos';
+    subPos.content.className = 'data-list';
+
+    const subInv = createCollapsibleSubSection('TECHNOLOGICAL INVENTIONS');
+    subInv.content.id = 'timeline-inv';
+    subInv.content.className = 'data-list';
+
+    card.appendChild(subHist.container);
+    card.appendChild(subOnce.container);
+    card.appendChild(subPos.container);
+    card.appendChild(subInv.container);
+
+    content.appendChild(card);
+    elements.resultsSection.appendChild(container);
+    renderLivedThroughData();
+}
+
+function renderTopMedia() {
+    const { container, content } = createCollapsibleSection('TOP MEDIA YEAR BORN');
+    const card = document.createElement('div');
+    card.className = 'card';
+
+    const subTracks = createCollapsibleSubSection('TOP 10 TRACKS THAT WEEK', false);
+    subTracks.content.id = 'top-songs';
+    subTracks.content.className = 'data-list';
+
+    const subTV = createCollapsibleSubSection('TOP 10 TV SHOWS THIS SEASON');
+    subTV.content.id = 'top-tv';
+    subTV.content.className = 'data-list';
+
+    const subMovies = createCollapsibleSubSection('TOP 5 BOX OFFICE HITS');
+    subMovies.content.id = 'top-movies';
+    subMovies.content.className = 'data-list';
+
+    card.appendChild(subTracks.container);
+    card.appendChild(subTV.container);
+    card.appendChild(subMovies.container);
+
+    content.appendChild(card);
+    elements.resultsSection.appendChild(container);
+    renderTopChartsData();
+}
+
+function renderBodyFacts() {
+    const { container, content } = createCollapsibleSection('BODY FACTS');
+    const totalDays = calculateAge(state.user.dob).years * 365;
     const age = calculateAge(state.user.dob);
-    const totalDays = age.years * 365;
     const list = document.createElement('div');
     list.className = 'data-list';
     list.innerHTML = `
-        <div class="list-item"><div class="item-num">01</div><div class="item-main"><div class="item-title">Hair Grown</div></div><div class="item-val">~${(totalDays * 0.035).toFixed(1)} meters</div></div>
-        <div class="list-item"><div class="item-num">02</div><div class="item-main"><div class="item-title">Nails Grown</div></div><div class="item-val">~${(totalDays * 0.01).toFixed(1)} cm</div></div>
-        <div class="list-item"><div class="item-num">03</div><div class="item-main"><div class="item-title">Skin Shed</div></div><div class="item-val">~${(age.years * 0.7).toFixed(1)} kg</div></div>
+        <div class="list-item"><div class="item-num">01</div><div class="item-main"><div class="item-title">Hair Grown</div></div><div class="item-val">~${(totalDays * 0.035).toFixed(1)}m</div></div>
+        <div class="list-item"><div class="item-num">02</div><div class="item-main"><div class="item-title">Nails Grown</div></div><div class="item-val">~${(totalDays * 0.01).toFixed(1)}cm</div></div>
+        <div class="list-item"><div class="item-num">03</div><div class="item-main"><div class="item-title">Skin Shed</div></div><div class="item-val">~${(age.years * 0.7).toFixed(1)}kg</div></div>
         <div class="list-item"><div class="item-num">04</div><div class="item-main"><div class="item-title">Total Blinks</div></div><div class="item-val">~${formatLarge(totalDays * 15 * 60 * 16)}</div></div>
     `;
     content.appendChild(list);
@@ -355,67 +353,83 @@ function renderGlobalStanding() {
     list.innerHTML = `
         <div class="list-item"><div class="item-num">01</div><div class="item-main"><div class="item-title">Age Percentile</div></div><div class="item-val">Older than ${percentile}%</div></div>
         <div class="list-item"><div class="item-num">02</div><div class="item-main"><div class="item-title">Global Human Rank</div></div><div class="item-val">~${formatLarge(8e9 * (1 - percentile/100))}</div></div>
-        <div class="list-item"><div class="item-num">03</div><div class="item-main"><div class="item-title">Generational Cohort</div></div><div class="item-val">${getGeneration(age)}</div></div>
     `;
     content.appendChild(list);
     elements.resultsSection.appendChild(container);
 }
 
-function getGeneration(age) {
-    const birthYear = new Date().getFullYear() - age;
-    if (birthYear >= 2010) return "Gen Alpha";
-    if (birthYear >= 1997) return "Gen Z";
-    if (birthYear >= 1981) return "Millennial";
-    if (birthYear >= 1965) return "Gen X";
-    if (birthYear >= 1946) return "Boomer";
-    return "Silent Gen";
-}
-
-function renderTechnologicalEra() {
-    const { container, content } = createCollapsibleSection('TECH ERA');
-    const birthYear = new Date(state.user.dob).getFullYear();
-    const techItems = [
-        { year: 1983, name: "The Internet (TCP/IP)" },
-        { year: 1989, name: "World Wide Web" },
-        { year: 1991, name: "Linux" },
-        { year: 1995, name: "Windows 95" },
-        { year: 1998, name: "Google" },
-        { year: 2001, name: "Wikipedia / iPod" },
-        { year: 2004, name: "Facebook" },
-        { year: 2007, name: "iPhone" },
-        { year: 2009, name: "Bitcoin" },
-        { year: 2010, name: "Instagram" },
-        { year: 2015, name: "Ethereum" },
-        { year: 2022, name: "ChatGPT (AI Era)" }
-    ].filter(i => i.year >= birthYear);
-
-    const list = document.createElement('div');
-    list.className = 'data-list';
-    list.innerHTML = techItems.slice(0, 6).map((item, i) => `
-        <div class="list-item"><div class="item-num">${(i+1).toString().padStart(2, '0')}</div><div class="item-main"><div class="item-title">${item.name}</div></div><div class="item-val">${item.year}</div></div>
-    `).join('') || '<div class="list-item">AI ERA DEFINED</div>';
-
-    content.appendChild(list);
+function renderStarFacts() {
+    const { container, content } = createCollapsibleSection('STAR FACTS');
+    const zodiac = getZodiac(new Date(state.user.dob));
+    const age = calculateAge(state.user.dob).years;
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.style.position = 'relative';
+    card.innerHTML = `
+        <div class="stellar-title">${zodiac.sign.toUpperCase()}</div>
+        <div class="item-subtitle" style="color: var(--accent-purple); font-weight: 600;">${zodiac.meaning}</div>
+        <div style="display: flex; gap: 8px; margin: 12px 0;">
+            <span class="badge-stone">BIRTHSTONE: DIAMOND</span>
+            <span class="badge-stone" style="background: rgba(179, 157, 219, 0.1); color: var(--accent-purple);">ELEMENT: ${zodiac.element.toUpperCase()}</span>
+        </div>
+        <div class="item-subtitle">STONE MEANING: SYMBOL OF ETERNAL LOVE AND INNER STRENGTH.</div>
+        <hr style="border:0; border-top:1px solid var(--border-color); margin: 16px 0;">
+        <div class="item-title">Light Travel Distance: <span class="item-val">${age} LY</span></div>
+        <div style="opacity:0.05; font-size:4rem; position:absolute; bottom:0; right:0;">✨</div>
+    `;
+    content.appendChild(card);
     elements.resultsSection.appendChild(container);
 }
 
-function renderEarthTransit() {
-    const { container, content } = createCollapsibleSection('EARTH TRANSIT');
+function renderEarthFacts() {
+    const { container, content } = createCollapsibleSection('EARTH FACTS');
     const age = calculateAge(state.user.dob).years;
-    const galacticDist = age * 4.5e9; // 4.5 billion miles per year orbital velocity in galaxy
-    const leaps = Math.floor(age / 4);
+    const galacticDist = age * 4.5e9;
     const list = document.createElement('div');
     list.className = 'data-list';
     list.innerHTML = `
         <div class="list-item"><div class="item-num">01</div><div class="item-main"><div class="item-title">Galactic Distance Traveled</div></div><div class="item-val">${formatLarge(galacticDist)} miles</div></div>
-        <div class="list-item"><div class="item-num">02</div><div class="item-main"><div class="item-title">Leap Years Survived</div></div><div class="item-val">${leaps}</div></div>
-        <div class="list-item"><div class="item-num">03</div><div class="item-main"><div class="item-title">Earth Revolutions</div></div><div class="item-val">${age} orbits</div></div>
+        <div class="list-item"><div class="item-num">02</div><div class="item-main"><div class="item-title">Leap Years Survived</div></div><div class="item-val">${Math.floor(age / 4)}</div></div>
     `;
     content.appendChild(list);
     elements.resultsSection.appendChild(container);
 }
 
-// --- Data Fetchers ---
+function renderEconomyFacts() {
+    const { container, content } = createCollapsibleSection('ECONOMY FACTS');
+    const age = calculateAge(state.user.dob).years;
+    const inflationFactor = Math.pow(1.03, age).toFixed(2);
+    const list = document.createElement('div');
+    list.className = 'data-list';
+    list.innerHTML = `
+        <div class="list-item"><div class="item-num">01</div><div class="item-main"><div class="item-title">Inflation Multiplier</div></div><div class="item-val">${inflationFactor}x</div></div>
+        <div class="list-item"><div class="item-num">02</div><div class="item-main"><div class="item-title">$1.00 then value</div></div><div class="item-val">$${inflationFactor} today</div></div>
+    `;
+    content.appendChild(list);
+    elements.resultsSection.appendChild(container);
+}
+
+function renderTechFacts() {
+    const { container, content } = createCollapsibleSection('TECH FACTS');
+    const birthYear = new Date(state.user.dob).getFullYear();
+    const techItems = [
+        { year: 1989, name: "World Wide Web" },
+        { year: 1995, name: "Windows 95" },
+        { year: 1998, name: "Google Search" },
+        { year: 2007, name: "iPhone (Mobile Era)" },
+        { year: 2009, name: "Bitcoin" },
+        { year: 2022, name: "ChatGPT (AI Era)" }
+    ].filter(i => i.year >= birthYear);
+    const list = document.createElement('div');
+    list.className = 'data-list';
+    list.innerHTML = techItems.map((item, i) => `
+        <div class="list-item"><div class="item-num">${(i+1).toString().padStart(2, '0')}</div><div class="item-main"><div class="item-title">${item.name}</div></div><div class="item-val">${item.year}</div></div>
+    `).join('') || '<div class="list-item">AI ERA DEFINED</div>';
+    content.appendChild(list);
+    elements.resultsSection.appendChild(container);
+}
+
+// --- Specialized Data Renderers ---
 
 async function renderLivedThroughData() {
     const histBox = document.getElementById('timeline-hist');
@@ -434,45 +448,87 @@ async function renderLivedThroughData() {
             <div class="timeline-item">
                 <div class="time-year">${e.year}</div>
                 <div class="time-line"></div>
-                <div class="time-content">${e.text}</div>
+                <div class="time-content">
+                    <a href="https://en.wikipedia.org/wiki/${encodeURIComponent(e.text)}" target="_blank" style="color:inherit; text-decoration:none; border-bottom: 1px dashed var(--accent-cyan);">${e.text}</a>
+                </div>
             </div>
         `).join('');
     } catch (e) {
         histBox.innerHTML = '<div class="item-subtitle">ARCHIVE ACCESS FAILED.</div>';
     }
 
-    const onceEvents = ["The Turn of the Millennium (2000)", "Halley's Comet (1986)", "First Image of a Black Hole (2019)", "Hale-Bopp Comet (1997)", "Great Conjunction (2020)", "Total Solar Eclipse", "Mars Perseverance Landing", "Higgs Boson Discovery", "Digital Migration", "Commercial Space Flight"];
-    onceBox.innerHTML = onceEvents.map((e, i) => `<div class="list-item" style="padding:8px 12px; font-size:0.8rem; border-color:#222;"><span class="item-num">${i+1}</span> ${e}</div>`).join('');
+    const createListWithLinks = (items, prefix = 'https://en.wikipedia.org/wiki/') => {
+        return items.map((e, i) => `
+            <div class="list-item" style="padding:8px 12px; font-size:0.8rem; border-color:#222;">
+                <div class="item-num">${i+1}</div>
+                <div class="item-main">
+                    <a href="${prefix}${encodeURIComponent(e)}" target="_blank" style="color:inherit; text-decoration:none; display:block; border-bottom: 1px dashed #444;">${e}</a>
+                </div>
+            </div>
+        `).join('');
+    };
 
-    const posEvents = ["Global Poverty Rates Halved", "Record Green Energy Growth", "Eradication of Major Diseases", "Global Access to Knowledge", "Marine Sanctuaries Created", "First Malaria Vaccine", "Ozone Layer Recovery", "ISS Occupation (2000+)", "Remote Education Rise", "Global Literacy Peak"];
-    posBox.innerHTML = posEvents.map((e, i) => `<div class="list-item" style="padding:8px 12px; font-size:0.8rem; border-color:#222;"><span class="item-num" style="color:var(--accent-green)">${i+1}</span> ${e}</div>`).join('');
-
-    const invEvents = ["The World Wide Web", "Smartphone Revolution", "Generative AI", "Electric Vehicles", "Blockchain & Crypto", "CRISPR Gene Editing", "3D Printing", "Commercial Drones", "Streaming Media", "Reusable Rockets"];
-    invBox.innerHTML = invEvents.map((e, i) => `<div class="list-item" style="padding:8px 12px; font-size:0.8rem; border-color:#222;"><span class="item-num" style="color:var(--accent-cyan)">${i+1}</span> ${e}</div>`).join('');
+    onceBox.innerHTML = createListWithLinks(["The Turn of the Millennium (2000)", "Halley's Comet", "First Image of a Black Hole", "Hale-Bopp Comet", "Great Conjunction", "Total Solar Eclipse", "Mars Perseverance Landing", "Higgs Boson Discovery", "Digital Migration", "Commercial Space Flight"]);
+    posBox.innerHTML = createListWithLinks(["Global Poverty Reduction", "Green Energy Growth", "Medical Breakthroughs", "Global Connectivity", "Marine Sanctuaries", "First Malaria Vaccine", "Ozone Recovery", "ISS Occupation", "Remote Education Rise", "Global Literacy Peak"]);
+    invBox.innerHTML = createListWithLinks(["The World Wide Web", "Smartphone Revolution", "Generative AI", "Electric Vehicles", "Blockchain", "CRISPR", "3D Printing", "Drones", "Streaming Media", "Reusable Rockets"]);
 }
 
 function renderTopChartsData() {
     const sBox = document.getElementById('top-songs'), tBox = document.getElementById('top-tv'), mBox = document.getElementById('top-movies');
     if (!sBox) return;
-    const songs = ["Smooth", "Say My Name", "Maria Maria", "Breathe", "I Knew I Loved You", "Amazed", "Everything You Want", "Bent", "It's Gonna Be Me", "Be With You"];
-    const tv = ["Friends", "ER", "Millionaire", "Frasier", "The West Wing", "The Practice", "60 Minutes", "Touched by an Angel", "Law & Order", "Everybody Loves Raymond"];
-    const movies = ["Toy Story 2", "The Green Mile", "Stuart Little", "Any Given Sunday", "Magnolia"];
-    sBox.innerHTML = songs.map((s, i) => `<div class="list-item" style="padding:6px 12px; font-size:0.75rem; border-color:#222;"><span class="item-num">${i+1}</span> ${s}</div>`).join('');
-    tBox.innerHTML = tv.map((s, i) => `<div class="list-item" style="padding:6px 12px; font-size:0.75rem; border-color:#222;"><span class="item-num">${i+1}</span> ${s}</div>`).join('');
-    mBox.innerHTML = movies.map((s, i) => `<div class="list-item" style="padding:6px 12px; font-size:0.75rem; border-color:#222;"><span class="item-num">${i+1}</span> ${s}</div>`).join('');
+
+    const year = new Date(state.user.dob).getFullYear();
+    const era = getEraData(year);
+
+    const createMediaList = (items, type) => {
+        const baseUrl = type === 'song' ? 'https://www.youtube.com/results?search_query=' : 'https://www.imdb.com/find?q=';
+        return items.map((s, i) => `
+            <div class="list-item" style="padding:6px 12px; font-size:0.75rem; border-color:#222;">
+                <span class="item-num">${i+1}</span>
+                <a href="${baseUrl}${encodeURIComponent(s)}" target="_blank" style="color:inherit; text-decoration:none; flex:1; margin-left:8px; border-bottom: 1px dashed #444;">${s}</a>
+            </div>
+        `).join('');
+    };
+
+    sBox.innerHTML = createMediaList(era.songs, 'song');
+    tBox.innerHTML = createMediaList(era.tv, 'tv');
+    mBox.innerHTML = createMediaList(era.movies, 'movie');
+}
+
+function getEraData(year) {
+    if (year >= 2010) {
+        return {
+            songs: ["Rolling in the Deep", "Party Rock Anthem", "Firework", "E.T.", "Give Me Everything", "Grenade", "Super Bass", "Moves Like Jagger", "The Show Goes On", "The Lazy Song"],
+            tv: ["Modern Family", "The Big Bang Theory", "Grey's Anatomy", "Glee", "Dancing with the Stars", "NCIS", "American Idol", "The Voice", "Game of Thrones", "Breaking Bad"],
+            movies: ["Avatar", "Toy Story 3", "Alice in Wonderland", "Harry Potter and the Deathly Hallows", "Inception"]
+        };
+    } else if (year >= 2000) {
+        return {
+            songs: ["Hanging by a Moment", "Fallin'", "All for You", "Drops of Jupiter", "I'm Real", "Smooth Criminal", "Bootylicious", "U Remind Me", "Hero", "Lady Marmalade"],
+            tv: ["Survivor", "ER", "Friends", "CSI: Crime Scene Investigation", "Will & Grace", "The West Wing", "Monday Night Football", "Everybody Loves Raymond", "Frasier", "Law & Order"],
+            movies: ["How the Grinch Stole Christmas", "Cast Away", "Mission: Impossible 2", "Gladiator", "What Women Want"]
+        };
+    } else if (year >= 1990) {
+        return {
+            songs: ["Smooth", "Say My Name", "Maria Maria", "Breathe", "I Knew I Loved You", "Amazed", "Everything You Want", "Bent", "It's Gonna Be Me", "Be With You"],
+            tv: ["Friends", "ER", "Who Wants to Be a Millionaire", "Frasier", "The West Wing", "The Practice", "60 Minutes", "Touched by an Angel", "Law & Order", "Everybody Loves Raymond"],
+            movies: ["Toy Story 2", "The Green Mile", "Stuart Little", "Any Given Sunday", "Magnolia"]
+        };
+    } else {
+        return {
+            songs: ["Every Breath You Take", "Billie Jean", "Flashdance... What a Feeling", "Down Under", "Beat It", "Total Eclipse of the Heart", "Maneater", "Baby, Come to Me", "Maniac", "Sweet Dreams (Are Made of This)"],
+            tv: ["60 Minutes", "Dallas", "M*A*S*H", "Magnum, P.I.", "Dynasty", "Three's Company", "Simon & Simon", "Falcon Crest", "The Love Boat", "The A-Team"],
+            movies: ["Return of the Jedi", "Terms of Endearment", "Flashdance", "Trading Places", "WarGames"]
+        };
+    }
 }
 
 // --- Utils ---
 
 function calculateAge(dobStr) {
-    const dob = new Date(dobStr);
-    const diff = new Date() - dob;
+    const diff = new Date() - new Date(dobStr);
     return {
         years: Math.floor(diff / 31557600000),
-        months: Math.floor(diff / 2629800000),
-        weeks: Math.floor(diff / 604800000),
-        days: Math.floor(diff / 86400000),
-        hours: Math.floor(diff / 3600000),
         minutes: Math.floor(diff / 60000),
         seconds: Math.floor(diff / 1000)
     };
@@ -487,10 +543,10 @@ function startLiveUpdates() {
 
         update('val-seconds', Math.floor(diff / 1000).toLocaleString());
         update('val-years', age.years);
-        update('val-months', age.months.toLocaleString());
-        update('val-weeks', age.weeks.toLocaleString());
-        update('val-days', age.days.toLocaleString());
-        update('val-hours', age.hours.toLocaleString());
+        update('val-months', Math.floor(diff / 2629800000).toLocaleString());
+        update('val-weeks', Math.floor(diff / 604800000).toLocaleString());
+        update('val-days', Math.floor(diff / 86400000).toLocaleString());
+        update('val-hours', Math.floor(diff / 3600000).toLocaleString());
         update('val-minutes', age.minutes.toLocaleString());
         update('val-born-day', new Date(state.user.dob).toLocaleDateString('en-US', { weekday: 'long' }).toUpperCase());
 
@@ -499,8 +555,6 @@ function startLiveUpdates() {
         update('est-breaths', formatLarge(mins * 14));
         update('est-sleep', formatLarge(days * 8));
         update('est-eat', formatLarge(days * 1.5));
-        update('est-words', formatLarge(days * 15000));
-        update('est-water', Math.floor(days * 2.5).toLocaleString());
     }, 1000);
 }
 
@@ -522,8 +576,8 @@ function getZodiac(date) {
         { sign: 'Gemini', meaning: 'Curious', element: 'Air', start: [5, 21], end: [6, 20] },
         { sign: 'Cancer', meaning: 'Sentimental', element: 'Water', start: [6, 21], end: [7, 22] },
         { sign: 'Leo', meaning: 'Outgoing', element: 'Fire', start: [7, 23], end: [8, 22] },
-        { sign: 'Virgo', meaning: 'Analytical', element: 'Earth', start: [8, 23], end: [9, 22] },
-        { sign: 'Libra', meaning: 'Social', element: 'Air', start: [9, 23], end: [10, 22] },
+        { sign: 'Virgo', meaning: 'Loyal, Analytical', element: 'Earth', start: [8, 23], end: [9, 22] },
+        { sign: 'Libra', meaning: 'Diplomatic, Artistic', element: 'Air', start: [9, 23], end: [10, 22] },
         { sign: 'Scorpio', meaning: 'Resourceful', element: 'Water', start: [10, 23], end: [11, 21] },
         { sign: 'Sagittarius', meaning: 'Optimistic', element: 'Fire', start: [11, 22], end: [12, 21] }
     ];
