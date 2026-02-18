@@ -119,16 +119,29 @@ function showResults() {
 
 // --- Layout Helpers ---
 
+function createDataList(items) {
+    const list = document.createElement('div');
+    list.className = 'data-list';
+    list.innerHTML = items.map((item, i) => `
+        <div class="list-item">
+            <div class="item-num">${(i + 1).toString().padStart(2, '0')}</div>
+            <div class="item-main">
+                <div class="item-title">${item.label}</div>
+                ${item.subtitle ? `<div class="item-subtitle">${item.subtitle}</div>` : ''}
+            </div>
+            <div class="item-val" ${item.id ? `id="${item.id}"` : ''}>${item.value || '-'}</div>
+        </div>
+    `).join('');
+    return list;
+}
+
 function createCollapsibleSection(label, isCollapsed = true) {
     const container = document.createElement('div');
     container.className = 'collapsible-section';
 
     const header = document.createElement('div');
-    header.className = 'section-label';
-    header.style.cursor = 'pointer';
-    header.style.display = 'flex';
-    header.style.justifyContent = 'space-between';
-    header.style.alignItems = 'center';
+    header.className = 'section-label flex-row align-center pointer justify-between';
+    header.style.margin = '24px 16px 8px'; // Keeping some margins that were original
     header.innerHTML = `<span>${label}</span> <span class="toggle-arrow">${isCollapsed ? '[+]' : '[-]'}</span>`;
 
     const content = document.createElement('div');
@@ -146,13 +159,10 @@ function createCollapsibleSection(label, isCollapsed = true) {
 
 function createCollapsibleSubSection(label, isCollapsed = true) {
     const container = document.createElement('div');
-    container.style.marginTop = '12px';
+    container.className = 'form-field-wrapper';
 
     const header = document.createElement('div');
-    header.className = 'sub-label';
-    header.style.cursor = 'pointer';
-    header.style.display = 'flex';
-    header.style.justifyContent = 'space-between';
+    header.className = 'sub-label pointer flex-row justify-between';
     header.style.color = 'var(--accent-amber)';
     header.innerHTML = `<span>${label}</span> <span class="sub-toggle-arrow">${isCollapsed ? '[+]' : '[-]'}</span>`;
 
@@ -179,7 +189,7 @@ function renderResults() {
     const profile = document.createElement('div');
     profile.className = 'card profile-card';
     profile.innerHTML = `
-        <div class="avatar-hex">${state.user.profilePic ? `<img src="${state.user.profilePic}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">` : '🧬'}</div>
+        <div class="avatar-hex">${state.user.profilePic ? `<img src="${state.user.profilePic}" class="avatar-img">` : '🧬'}</div>
         <div class="profile-details">
             <div class="sub-label">SUBJECT</div>
             <h2>${state.user.name.toUpperCase() || 'ANONYMOUS'}</h2>
@@ -231,46 +241,44 @@ function renderLiveStats() {
     const dob = new Date(state.user.dob);
     const totalDays = calculateAge(state.user.dob).years * 365;
 
-    const card = document.createElement('div');
-    card.className = 'card';
-    card.innerHTML = `
+    const heroCard = document.createElement('div');
+    heroCard.className = 'card';
+    heroCard.innerHTML = `
         <div class="biometrics-main">
             <div class="stream-label"><span>Total Seconds Elapsed</span> <span class="live-feed-text">LIVE_FEED</span></div>
             <div class="large-value" id="val-seconds">-</div>
         </div>
-        <div class="biometrics-grid">
-            <div class="mini-stat-box"><span class="val" id="val-years">-</span><span class="lbl">YRS</span></div>
-            <div class="mini-stat-box"><span class="val" id="val-months">-</span><span class="lbl">MOS</span></div>
-            <div class="mini-stat-box"><span class="val" id="val-weeks">-</span><span class="lbl">WKS</span></div>
-            <div class="mini-stat-box"><span class="val" id="val-days">-</span><span class="lbl">DAYS</span></div>
-            <div class="mini-stat-box"><span class="val" id="val-hours">-</span><span class="lbl">HRS</span></div>
-            <div class="mini-stat-box"><span class="val" id="val-minutes">-</span><span class="lbl">MINS</span></div>
-            <div class="mini-stat-box" style="grid-column: span 2; border-color: var(--accent-amber);"><span class="val" id="val-born-day" style="font-size: 0.8rem; color: var(--accent-amber)">-</span><span class="lbl">DAY BORN</span></div>
-        </div>
     `;
-    content.appendChild(card);
+    content.appendChild(heroCard);
+
+    const ageStats = createDataList([
+        { label: 'DAY BORN', id: 'val-born-day', value: '-' },
+        { label: 'YEARS ELAPSED', id: 'val-years', value: '-' },
+        { label: 'MONTHS ELAPSED', id: 'val-months', value: '-' },
+        { label: 'WEEKS ELAPSED', id: 'val-weeks', value: '-' },
+        { label: 'DAYS ELAPSED', id: 'val-days', value: '-' },
+        { label: 'HOURS ELAPSED', id: 'val-hours', value: '-' },
+        { label: 'MINUTES ELAPSED', id: 'val-minutes', value: '-' }
+    ]);
+    content.appendChild(ageStats);
 
     const subBody = createCollapsibleSubSection('BODY FACTS (BIOMETRIC MILESTONES)', false);
-    subBody.content.className = 'data-list';
-    subBody.content.style.marginTop = '8px';
-    subBody.content.innerHTML = `
-        <div class="list-item"><div class="item-num">01</div><div class="item-main"><div class="item-title">Hair Grown</div></div><div class="item-val">~${(totalDays * 0.035).toFixed(1)}m</div></div>
-        <div class="list-item"><div class="item-num">02</div><div class="item-main"><div class="item-title">Nails Grown</div></div><div class="item-val">~${(totalDays * 0.01).toFixed(1)}cm</div></div>
-        <div class="list-item"><div class="item-num">03</div><div class="item-main"><div class="item-title">Skin Shed</div></div><div class="item-val">~${(calculateAge(state.user.dob).years * 0.7).toFixed(1)}kg</div></div>
-        <div class="list-item"><div class="item-num">04</div><div class="item-main"><div class="item-title">Total Blinks</div></div><div class="item-val" id="est-blinks">-</div></div>
-    `;
+    subBody.content.appendChild(createDataList([
+        { label: 'Hair Grown', value: `~${(totalDays * 0.035).toFixed(1)}m` },
+        { label: 'Nails Grown', value: `~${(totalDays * 0.01).toFixed(1)}cm` },
+        { label: 'Skin Shed', value: `~${(calculateAge(state.user.dob).years * 0.7).toFixed(1)}kg` },
+        { label: 'Total Blinks', id: 'est-blinks', value: '-' }
+    ]));
     content.appendChild(subBody.container);
 
-    const grid = document.createElement('div');
-    grid.className = 'stats-2x2';
-    grid.style.marginTop = '12px';
-    grid.innerHTML = `
-        <div class="grid-item"><div class="lbl">HEARTBEATS</div><div class="val" id="est-heart">-</div></div>
-        <div class="grid-item"><div class="lbl">BREATHS</div><div class="val" id="est-breaths">-</div></div>
-        <div class="grid-item"><div class="lbl">HOURS ASLEEP</div><div class="val" id="est-sleep">-</div><span class="unit">EST</span></div>
-        <div class="grid-item"><div class="lbl">HOURS CONSUMING</div><div class="val" id="est-eat">-</div><span class="unit">EST</span></div>
-    `;
-    content.appendChild(grid);
+    const bioStats = createDataList([
+        { label: 'HEARTBEATS', id: 'est-heart', value: '-' },
+        { label: 'BREATHS', id: 'est-breaths', value: '-' },
+        { label: 'HOURS ASLEEP', id: 'est-sleep', value: '-', subtitle: 'ESTIMATED' },
+        { label: 'HOURS CONSUMING', id: 'est-eat', value: '-', subtitle: 'ESTIMATED' }
+    ]);
+    content.appendChild(bioStats);
+
     elements.resultsSection.appendChild(container);
 }
 
@@ -278,17 +286,16 @@ function renderNameFacts() {
     const { container, content } = createCollapsibleSection('NAME FACTS');
     const age = calculateAge(state.user.dob).years;
     const country = state.user.country || 'Global';
-    const list = document.createElement('div');
-    list.className = 'data-list';
-    list.innerHTML = `
-        <div class="list-item"><div class="item-num">01</div><div class="item-main"><div class="item-title">Global Pop. @ Birth</div></div><div class="item-val">~${(8.1 - (age * 0.085)).toFixed(1)}B</div></div>
-        <div class="list-item"><div class="item-num">02</div><div class="item-main"><div class="item-title">People Older</div></div><div class="item-val">~${(4.5 - (age * 0.05)).toFixed(1)}B</div></div>
-        <div class="list-item"><div class="item-num">03</div><div class="item-main"><div class="item-title">Name Frequency (${country})</div></div><div class="item-val">~1/2,500</div></div>
-        <div class="list-item"><div class="item-num">04</div><div class="item-main"><div class="item-title">Born Same Day</div></div><div class="item-val">~365k</div></div>
-        <div class="list-item"><div class="item-num">05</div><div class="item-main"><div class="item-title">Name Popularity (Birth)</div></div><div class="item-val">#${(state.user.name.length * 7 % 100) + 1}</div></div>
-        <div class="list-item"><div class="item-num">06</div><div class="item-main"><div class="item-title">Name Popularity (Now)</div></div><div class="item-val">#${(state.user.name.length * 13 % 500) + 50}</div></div>
-    `;
-    content.appendChild(list);
+
+    content.appendChild(createDataList([
+        { label: 'Global Pop. @ Birth', value: `~${(8.1 - (age * 0.085)).toFixed(1)}B` },
+        { label: 'People Older', value: `~${(4.5 - (age * 0.05)).toFixed(1)}B` },
+        { label: `Name Frequency (${country})`, value: '~1/2,500' },
+        { label: 'Born Same Day', value: '~365k' },
+        { label: 'Name Popularity (Birth)', value: `#${(state.user.name.length * 7 % 100) + 1}` },
+        { label: 'Name Popularity (Now)', value: `#${(state.user.name.length * 13 % 500) + 50}` }
+    ]));
+
     elements.resultsSection.appendChild(container);
 }
 
@@ -296,7 +303,7 @@ function renderEventsLived() {
     const { container, content } = createCollapsibleSection('EVENTS LIVED');
     const card = document.createElement('div');
     card.className = 'card';
-    card.innerHTML = `<div class="item-subtitle" style="margin-bottom:12px;">SOURCE: GLOBAL_HISTORY_DB</div>`;
+    card.innerHTML = `<div class="item-subtitle margin-bottom-md">SOURCE: GLOBAL_HISTORY_DB</div>`;
 
     const subHist = createCollapsibleSubSection('HISTORICAL TIMELINE (20 EVENTS)', false);
     subHist.content.id = 'timeline-hist';
@@ -354,13 +361,12 @@ function renderGlobalStanding() {
     const { container, content } = createCollapsibleSection('GLOBAL STANDING');
     const age = calculateAge(state.user.dob).years;
     const percentile = Math.min(99, Math.max(1, age * 1.2)).toFixed(1);
-    const list = document.createElement('div');
-    list.className = 'data-list';
-    list.innerHTML = `
-        <div class="list-item"><div class="item-num">01</div><div class="item-main"><div class="item-title">Age Percentile</div></div><div class="item-val">Older than ${percentile}%</div></div>
-        <div class="list-item"><div class="item-num">02</div><div class="item-main"><div class="item-title">Global Human Rank</div></div><div class="item-val">~${formatLarge(8e9 * (1 - percentile/100))}</div></div>
-    `;
-    content.appendChild(list);
+
+    content.appendChild(createDataList([
+        { label: 'Age Percentile', value: `Older than ${percentile}%` },
+        { label: 'Global Human Rank', value: `~${formatLarge(8e9 * (1 - percentile/100))}` }
+    ]));
+
     elements.resultsSection.appendChild(container);
 }
 
@@ -369,19 +375,18 @@ function renderStarFacts() {
     const zodiac = getZodiac(new Date(state.user.dob));
     const age = calculateAge(state.user.dob).years;
     const card = document.createElement('div');
-    card.className = 'card';
-    card.style.position = 'relative';
+    card.className = 'card relative';
     card.innerHTML = `
         <div class="stellar-title">${zodiac.sign.toUpperCase()}</div>
-        <div class="item-subtitle" style="color: var(--accent-purple); font-weight: 600;">${zodiac.meaning}</div>
-        <div style="display: flex; gap: 8px; margin: 12px 0;">
+        <div class="item-subtitle color-purple font-weight-bold">${zodiac.meaning}</div>
+        <div class="flex-row gap-sm margin-vertical-md">
             <span class="badge-stone">BIRTHSTONE: DIAMOND</span>
-            <span class="badge-stone" style="background: rgba(179, 157, 219, 0.1); color: var(--accent-purple);">ELEMENT: ${zodiac.element.toUpperCase()}</span>
+            <span class="badge-stone badge-purple">ELEMENT: ${zodiac.element.toUpperCase()}</span>
         </div>
         <div class="item-subtitle">STONE MEANING: SYMBOL OF ETERNAL LOVE AND INNER STRENGTH.</div>
-        <hr style="border:0; border-top:1px solid var(--border-color); margin: 16px 0;">
+        <hr class="divider">
         <div class="item-title">Light Travel Distance: <span class="item-val">${age} LY</span></div>
-        <div style="opacity:0.05; font-size:4rem; position:absolute; bottom:0; right:0;">✨</div>
+        <div class="opacity-low font-large-icon absolute-bottom-right">✨</div>
     `;
     content.appendChild(card);
     elements.resultsSection.appendChild(container);
@@ -391,13 +396,12 @@ function renderEarthFacts() {
     const { container, content } = createCollapsibleSection('EARTH FACTS');
     const age = calculateAge(state.user.dob).years;
     const galacticDist = age * 4.5e9;
-    const list = document.createElement('div');
-    list.className = 'data-list';
-    list.innerHTML = `
-        <div class="list-item"><div class="item-num">01</div><div class="item-main"><div class="item-title">Galactic Distance Traveled</div></div><div class="item-val">${formatLarge(galacticDist)} miles</div></div>
-        <div class="list-item"><div class="item-num">02</div><div class="item-main"><div class="item-title">Leap Years Survived</div></div><div class="item-val">${Math.floor(age / 4)}</div></div>
-    `;
-    content.appendChild(list);
+
+    content.appendChild(createDataList([
+        { label: 'Galactic Distance Traveled', value: `${formatLarge(galacticDist)} miles` },
+        { label: 'Leap Years Survived', value: `${Math.floor(age / 4)}` }
+    ]));
+
     elements.resultsSection.appendChild(container);
 }
 
@@ -405,13 +409,12 @@ function renderEconomyFacts() {
     const { container, content } = createCollapsibleSection('ECONOMY FACTS');
     const age = calculateAge(state.user.dob).years;
     const inflationFactor = Math.pow(1.03, age).toFixed(2);
-    const list = document.createElement('div');
-    list.className = 'data-list';
-    list.innerHTML = `
-        <div class="list-item"><div class="item-num">01</div><div class="item-main"><div class="item-title">Inflation Multiplier</div></div><div class="item-val">${inflationFactor}x</div></div>
-        <div class="list-item"><div class="item-num">02</div><div class="item-main"><div class="item-title">$1.00 then value</div></div><div class="item-val">$${inflationFactor} today</div></div>
-    `;
-    content.appendChild(list);
+
+    content.appendChild(createDataList([
+        { label: 'Inflation Multiplier', value: `${inflationFactor}x` },
+        { label: '$1.00 then value', value: `$${inflationFactor} today` }
+    ]));
+
     elements.resultsSection.appendChild(container);
 }
 
@@ -426,68 +429,68 @@ function renderTechFacts() {
         { year: 2009, name: "Bitcoin" },
         { year: 2022, name: "ChatGPT (AI Era)" }
     ].filter(i => i.year >= birthYear);
-    const list = document.createElement('div');
-    list.className = 'data-list';
-    list.innerHTML = techItems.map((item, i) => `
-        <div class="list-item"><div class="item-num">${(i+1).toString().padStart(2, '0')}</div><div class="item-main"><div class="item-title">${item.name}</div></div><div class="item-val">${item.year}</div></div>
-    `).join('') || '<div class="list-item">AI ERA DEFINED</div>';
-    content.appendChild(list);
+
+    content.appendChild(createDataList(techItems.map(item => ({
+        label: item.name,
+        value: `${item.year}`
+    }))));
+
+    if (techItems.length === 0) {
+        content.innerHTML = '<div class="list-item">AI ERA DEFINED</div>';
+    }
+
     elements.resultsSection.appendChild(container);
 }
 
 function renderNetworkFacts() {
     const { container, content } = createCollapsibleSection('NETWORK FACTS');
     const days = calculateAge(state.user.dob).years * 365;
-    const list = document.createElement('div');
-    list.className = 'data-list';
-    list.innerHTML = `
-        <div class="list-item"><div class="item-num">01</div><div class="item-main"><div class="item-title">Estimated Emails Sent</div></div><div class="item-val">~${formatLarge(days * 20)}</div></div>
-        <div class="list-item"><div class="item-num">02</div><div class="item-main"><div class="item-title">Data Consumed (GB)</div></div><div class="item-val">~${formatLarge(days * 5)} GB</div></div>
-        <div class="list-item"><div class="item-num">03</div><div class="item-main"><div class="item-title">Internet User Growth</div></div><div class="item-val">+5.2B since birth</div></div>
-    `;
-    content.appendChild(list);
+
+    content.appendChild(createDataList([
+        { label: 'Estimated Emails Sent', value: `~${formatLarge(days * 20)}` },
+        { label: 'Data Consumed (GB)', value: `~${formatLarge(days * 5)} GB` },
+        { label: 'Internet User Growth', value: '+5.2B since birth' }
+    ]));
+
     elements.resultsSection.appendChild(container);
 }
 
 function renderEcoFacts() {
     const { container, content } = createCollapsibleSection('ECO FACTS');
     const age = calculateAge(state.user.dob).years;
-    const list = document.createElement('div');
-    list.className = 'data-list';
-    list.innerHTML = `
-        <div class="list-item"><div class="item-num">01</div><div class="item-main"><div class="item-title">Carbon Footprint</div></div><div class="item-val">~${(age * 4.8).toFixed(1)} Tonnes CO2</div></div>
-        <div class="list-item"><div class="item-num">02</div><div class="item-main"><div class="item-title">Waste Produced</div></div><div class="item-val">~${formatLarge(age * 700)} kg</div></div>
-        <div class="list-item"><div class="item-num">03</div><div class="item-main"><div class="item-title">Offset Trees Required</div></div><div class="item-val">~${(age * 25).toLocaleString()} trees</div></div>
-    `;
-    content.appendChild(list);
+
+    content.appendChild(createDataList([
+        { label: 'Carbon Footprint', value: `~${(age * 4.8).toFixed(1)} Tonnes CO2` },
+        { label: 'Waste Produced', value: `~${formatLarge(age * 700)} kg` },
+        { label: 'Offset Trees Required', value: `~${(age * 25).toLocaleString()} trees` }
+    ]));
+
     elements.resultsSection.appendChild(container);
 }
 
 function renderPowerFacts() {
     const { container, content } = createCollapsibleSection('POWER FACTS');
     const days = calculateAge(state.user.dob).years * 365;
-    const list = document.createElement('div');
-    list.className = 'data-list';
-    list.innerHTML = `
-        <div class="list-item"><div class="item-num">01</div><div class="item-main"><div class="item-title">Total Energy Expended</div></div><div class="item-val">~${(days * 8.4).toLocaleString()} MJ</div></div>
-        <div class="list-item"><div class="item-num">02</div><div class="item-main"><div class="item-title">Steps Taken</div></div><div class="item-val">~${formatLarge(days * 5000)}</div></div>
-        <div class="list-item"><div class="item-num">03</div><div class="item-main"><div class="item-title">Heart Mechanical Work</div></div><div class="item-val">~${formatLarge(days * 100000)} Joules</div></div>
-    `;
-    content.appendChild(list);
+
+    content.appendChild(createDataList([
+        { label: 'Total Energy Expended', value: `~${(days * 8.4).toLocaleString()} MJ` },
+        { label: 'Steps Taken', value: `~${formatLarge(days * 5000)}` },
+        { label: 'Heart Mechanical Work', value: `~${formatLarge(days * 100000)} Joules` }
+    ]));
+
     elements.resultsSection.appendChild(container);
 }
 
 function renderKnowledgeFacts() {
     const { container, content } = createCollapsibleSection('KNOWLEDGE FACTS');
     const days = calculateAge(state.user.dob).years * 365;
-    const list = document.createElement('div');
-    list.className = 'data-list';
-    list.innerHTML = `
-        <div class="list-item"><div class="item-num">01</div><div class="item-main"><div class="item-title">Words Read (EST)</div></div><div class="item-val">~${formatLarge(days * 10000)}</div></div>
-        <div class="list-item"><div class="item-num">02</div><div class="item-main"><div class="item-title">Books Equivalent</div></div><div class="item-val">~${Math.floor(days / 10)}</div></div>
-        <div class="list-item"><div class="item-num">03</div><div class="item-main"><div class="item-title">Human Knowledge Growth</div></div><div class="item-val">~175 Zettabytes</div></div>
-    `;
-    content.appendChild(list);
+
+    content.appendChild(createDataList([
+        { label: 'Words Read (EST)', value: `~${formatLarge(days * 10000)}` },
+        { label: 'Books Equivalent', value: `~${Math.floor(days / 10)}` },
+        { label: 'Human Knowledge Growth', value: '~175 Zettabytes' }
+    ]));
+
     elements.resultsSection.appendChild(container);
 }
 
@@ -511,7 +514,7 @@ async function renderLivedThroughData() {
                 <div class="time-year">${e.year}</div>
                 <div class="time-line"></div>
                 <div class="time-content">
-                    <a href="https://en.wikipedia.org/wiki/${encodeURIComponent(e.text)}" target="_blank" style="color:inherit; text-decoration:none; border-bottom: 1px dashed var(--accent-cyan);">${e.text}</a>
+                    <a href="https://en.wikipedia.org/wiki/${encodeURIComponent(e.text)}" target="_blank" class="link-no-decor link-dashed-cyan">${e.text}</a>
                 </div>
             </div>
         `).join('');
@@ -521,10 +524,10 @@ async function renderLivedThroughData() {
 
     const createListWithLinks = (items, prefix = 'https://en.wikipedia.org/wiki/') => {
         return items.map((e, i) => `
-            <div class="list-item" style="padding:8px 12px; font-size:0.8rem; border-color:#222;">
+            <div class="list-item padding-sm-rect font-size-sm border-subtle">
                 <div class="item-num">${i+1}</div>
                 <div class="item-main">
-                    <a href="${prefix}${encodeURIComponent(e)}" target="_blank" style="color:inherit; text-decoration:none; display:block; border-bottom: 1px dashed #444;">${e}</a>
+                    <a href="${prefix}${encodeURIComponent(e)}" target="_blank" class="link-no-decor display-block link-dashed">${e}</a>
                 </div>
             </div>
         `).join('');
@@ -545,9 +548,9 @@ function renderTopChartsData() {
     const createMediaList = (items, type) => {
         const baseUrl = type === 'song' ? 'https://www.youtube.com/results?search_query=' : 'https://www.imdb.com/find?q=';
         return items.map((s, i) => `
-            <div class="list-item" style="padding:6px 12px; font-size:0.75rem; border-color:#222;">
+            <div class="list-item padding-xs-rect font-size-xs border-subtle">
                 <span class="item-num">${i+1}</span>
-                <a href="${baseUrl}${encodeURIComponent(s)}" target="_blank" style="color:inherit; text-decoration:none; flex:1; margin-left:8px; border-bottom: 1px dashed #444;">${s}</a>
+                <a href="${baseUrl}${encodeURIComponent(s)}" target="_blank" class="link-no-decor flex-1 margin-left-sm link-dashed">${s}</a>
             </div>
         `).join('');
     };
@@ -655,7 +658,7 @@ async function generatePDF() {
         margin:       10,
         filename:     `LifeStats_${state.user.name || 'Citizen'}.pdf`,
         image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, backgroundColor: '#141614' },
+        html2canvas:  { scale: 2, backgroundColor: '#0a0a0a' },
         jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
