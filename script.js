@@ -124,11 +124,8 @@ function createCollapsibleSection(label, isCollapsed = true) {
     container.className = 'collapsible-section';
 
     const header = document.createElement('div');
-    header.className = 'section-label';
-    header.style.cursor = 'pointer';
-    header.style.display = 'flex';
-    header.style.justifyContent = 'space-between';
-    header.style.alignItems = 'center';
+    header.className = 'section-label flex-row align-center pointer justify-between';
+    header.style.margin = '24px 16px 8px'; // Keeping some margins that were original
     header.innerHTML = `<span>${label}</span> <span class="toggle-arrow">${isCollapsed ? '[+]' : '[-]'}</span>`;
 
     const content = document.createElement('div');
@@ -146,13 +143,10 @@ function createCollapsibleSection(label, isCollapsed = true) {
 
 function createCollapsibleSubSection(label, isCollapsed = true) {
     const container = document.createElement('div');
-    container.style.marginTop = '12px';
+    container.className = 'form-field-wrapper';
 
     const header = document.createElement('div');
-    header.className = 'sub-label';
-    header.style.cursor = 'pointer';
-    header.style.display = 'flex';
-    header.style.justifyContent = 'space-between';
+    header.className = 'sub-label pointer flex-row justify-between';
     header.style.color = 'var(--accent-amber)';
     header.innerHTML = `<span>${label}</span> <span class="sub-toggle-arrow">${isCollapsed ? '[+]' : '[-]'}</span>`;
 
@@ -179,7 +173,7 @@ function renderResults() {
     const profile = document.createElement('div');
     profile.className = 'card profile-card';
     profile.innerHTML = `
-        <div class="avatar-hex">${state.user.profilePic ? `<img src="${state.user.profilePic}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">` : '🧬'}</div>
+        <div class="avatar-hex">${state.user.profilePic ? `<img src="${state.user.profilePic}" class="avatar-img">` : '🧬'}</div>
         <div class="profile-details">
             <div class="sub-label">SUBJECT</div>
             <h2>${state.user.name.toUpperCase() || 'ANONYMOUS'}</h2>
@@ -245,14 +239,13 @@ function renderLiveStats() {
             <div class="mini-stat-box"><span class="val" id="val-days">-</span><span class="lbl">DAYS</span></div>
             <div class="mini-stat-box"><span class="val" id="val-hours">-</span><span class="lbl">HRS</span></div>
             <div class="mini-stat-box"><span class="val" id="val-minutes">-</span><span class="lbl">MINS</span></div>
-            <div class="mini-stat-box" style="grid-column: span 2; border-color: var(--accent-amber);"><span class="val" id="val-born-day" style="font-size: 0.8rem; color: var(--accent-amber)">-</span><span class="lbl">DAY BORN</span></div>
+            <div class="mini-stat-box col-span-2 border-amber"><span class="val font-size-sm color-amber" id="val-born-day">-</span><span class="lbl">DAY BORN</span></div>
         </div>
     `;
     content.appendChild(card);
 
     const subBody = createCollapsibleSubSection('BODY FACTS (BIOMETRIC MILESTONES)', false);
-    subBody.content.className = 'data-list';
-    subBody.content.style.marginTop = '8px';
+    subBody.content.className = 'data-list margin-top-sm';
     subBody.content.innerHTML = `
         <div class="list-item"><div class="item-num">01</div><div class="item-main"><div class="item-title">Hair Grown</div></div><div class="item-val">~${(totalDays * 0.035).toFixed(1)}m</div></div>
         <div class="list-item"><div class="item-num">02</div><div class="item-main"><div class="item-title">Nails Grown</div></div><div class="item-val">~${(totalDays * 0.01).toFixed(1)}cm</div></div>
@@ -262,8 +255,7 @@ function renderLiveStats() {
     content.appendChild(subBody.container);
 
     const grid = document.createElement('div');
-    grid.className = 'stats-2x2';
-    grid.style.marginTop = '12px';
+    grid.className = 'stats-2x2 margin-top-md';
     grid.innerHTML = `
         <div class="grid-item"><div class="lbl">HEARTBEATS</div><div class="val" id="est-heart">-</div></div>
         <div class="grid-item"><div class="lbl">BREATHS</div><div class="val" id="est-breaths">-</div></div>
@@ -296,7 +288,7 @@ function renderEventsLived() {
     const { container, content } = createCollapsibleSection('EVENTS LIVED');
     const card = document.createElement('div');
     card.className = 'card';
-    card.innerHTML = `<div class="item-subtitle" style="margin-bottom:12px;">SOURCE: GLOBAL_HISTORY_DB</div>`;
+    card.innerHTML = `<div class="item-subtitle margin-bottom-md">SOURCE: GLOBAL_HISTORY_DB</div>`;
 
     const subHist = createCollapsibleSubSection('HISTORICAL TIMELINE (20 EVENTS)', false);
     subHist.content.id = 'timeline-hist';
@@ -369,19 +361,18 @@ function renderStarFacts() {
     const zodiac = getZodiac(new Date(state.user.dob));
     const age = calculateAge(state.user.dob).years;
     const card = document.createElement('div');
-    card.className = 'card';
-    card.style.position = 'relative';
+    card.className = 'card relative';
     card.innerHTML = `
         <div class="stellar-title">${zodiac.sign.toUpperCase()}</div>
-        <div class="item-subtitle" style="color: var(--accent-purple); font-weight: 600;">${zodiac.meaning}</div>
-        <div style="display: flex; gap: 8px; margin: 12px 0;">
+        <div class="item-subtitle color-purple font-weight-bold">${zodiac.meaning}</div>
+        <div class="flex-row gap-sm margin-vertical-md">
             <span class="badge-stone">BIRTHSTONE: DIAMOND</span>
-            <span class="badge-stone" style="background: rgba(179, 157, 219, 0.1); color: var(--accent-purple);">ELEMENT: ${zodiac.element.toUpperCase()}</span>
+            <span class="badge-stone badge-purple">ELEMENT: ${zodiac.element.toUpperCase()}</span>
         </div>
         <div class="item-subtitle">STONE MEANING: SYMBOL OF ETERNAL LOVE AND INNER STRENGTH.</div>
-        <hr style="border:0; border-top:1px solid var(--border-color); margin: 16px 0;">
+        <hr class="divider">
         <div class="item-title">Light Travel Distance: <span class="item-val">${age} LY</span></div>
-        <div style="opacity:0.05; font-size:4rem; position:absolute; bottom:0; right:0;">✨</div>
+        <div class="opacity-low font-large-icon absolute-bottom-right">✨</div>
     `;
     content.appendChild(card);
     elements.resultsSection.appendChild(container);
@@ -511,7 +502,7 @@ async function renderLivedThroughData() {
                 <div class="time-year">${e.year}</div>
                 <div class="time-line"></div>
                 <div class="time-content">
-                    <a href="https://en.wikipedia.org/wiki/${encodeURIComponent(e.text)}" target="_blank" style="color:inherit; text-decoration:none; border-bottom: 1px dashed var(--accent-cyan);">${e.text}</a>
+                    <a href="https://en.wikipedia.org/wiki/${encodeURIComponent(e.text)}" target="_blank" class="link-no-decor link-dashed-cyan">${e.text}</a>
                 </div>
             </div>
         `).join('');
@@ -521,10 +512,10 @@ async function renderLivedThroughData() {
 
     const createListWithLinks = (items, prefix = 'https://en.wikipedia.org/wiki/') => {
         return items.map((e, i) => `
-            <div class="list-item" style="padding:8px 12px; font-size:0.8rem; border-color:#222;">
+            <div class="list-item padding-sm-rect font-size-sm border-subtle">
                 <div class="item-num">${i+1}</div>
                 <div class="item-main">
-                    <a href="${prefix}${encodeURIComponent(e)}" target="_blank" style="color:inherit; text-decoration:none; display:block; border-bottom: 1px dashed #444;">${e}</a>
+                    <a href="${prefix}${encodeURIComponent(e)}" target="_blank" class="link-no-decor display-block link-dashed">${e}</a>
                 </div>
             </div>
         `).join('');
@@ -545,9 +536,9 @@ function renderTopChartsData() {
     const createMediaList = (items, type) => {
         const baseUrl = type === 'song' ? 'https://www.youtube.com/results?search_query=' : 'https://www.imdb.com/find?q=';
         return items.map((s, i) => `
-            <div class="list-item" style="padding:6px 12px; font-size:0.75rem; border-color:#222;">
+            <div class="list-item padding-xs-rect font-size-xs border-subtle">
                 <span class="item-num">${i+1}</span>
-                <a href="${baseUrl}${encodeURIComponent(s)}" target="_blank" style="color:inherit; text-decoration:none; flex:1; margin-left:8px; border-bottom: 1px dashed #444;">${s}</a>
+                <a href="${baseUrl}${encodeURIComponent(s)}" target="_blank" class="link-no-decor flex-1 margin-left-sm link-dashed">${s}</a>
             </div>
         `).join('');
     };
@@ -655,7 +646,7 @@ async function generatePDF() {
         margin:       10,
         filename:     `LifeStats_${state.user.name || 'Citizen'}.pdf`,
         image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, backgroundColor: '#141614' },
+        html2canvas:  { scale: 2, backgroundColor: '#0a0a0a' },
         jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
