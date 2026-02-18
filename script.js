@@ -159,12 +159,14 @@ function createCollapsibleSection(label, isCollapsed = true) {
 
 function createCollapsibleSubSection(label, isCollapsed = true) {
     const container = document.createElement('div');
-    container.className = 'form-field-wrapper';
+    container.className = 'margin-top-md';
 
     const header = document.createElement('div');
-    header.className = 'sub-label pointer flex-row justify-between';
+    header.className = 'sub-label pointer flex-row justify-between align-center';
     header.style.color = 'var(--accent-amber)';
-    header.innerHTML = `<span>${label}</span> <span class="sub-toggle-arrow">${isCollapsed ? '[+]' : '[-]'}</span>`;
+    header.style.padding = '8px 0';
+    header.style.borderBottom = '1px solid var(--md-sys-color-outline-variant)';
+    header.innerHTML = `<span style="font-weight: 700; font-size: 0.75rem; letter-spacing: 0.5px; text-transform: uppercase;">${label}</span> <span class="sub-toggle-arrow">${isCollapsed ? '[+]' : '[-]'}</span>`;
 
     const content = document.createElement('div');
     content.className = isCollapsed ? 'hidden' : '';
@@ -224,8 +226,8 @@ function renderResults() {
     const footer = document.createElement('div');
     footer.className = 'footer-actions';
     footer.innerHTML = `
-        <button class="reinit-btn" onclick="location.reload()" style="margin-bottom: 12px;"><span>🔄</span> NEW ANALYSIS</button>
-        <button class="reinit-btn" id="download-pdf-btn" style="background: var(--accent-cyan);"><span>📄</span> DOWNLOAD PDF SUMMARY</button>
+        <button class="reinit-btn margin-bottom-md" onclick="location.reload()"><span>🔄</span> NEW ANALYSIS</button>
+        <button class="reinit-btn btn-cyan" id="download-pdf-btn"><span>📄</span> DOWNLOAD PDF SUMMARY</button>
     `;
     elements.resultsSection.appendChild(footer);
 
@@ -292,13 +294,20 @@ function renderNameFacts() {
 
 function renderEventsLived() {
     const { container, content } = createCollapsibleSection('EVENTS LIVED');
-    const card = document.createElement('div');
-    card.className = 'card';
-    card.innerHTML = `<div class="item-subtitle margin-bottom-md">SOURCE: GLOBAL_HISTORY_DB</div>`;
+
+    const sourceInfo = document.createElement('div');
+    sourceInfo.className = 'item-subtitle';
+    sourceInfo.style.margin = '0 16px 8px';
+    sourceInfo.textContent = 'SOURCE: GLOBAL_HISTORY_DB';
+    content.appendChild(sourceInfo);
+
+    const mainCard = document.createElement('div');
+    mainCard.className = 'card';
+    mainCard.style.marginTop = '0';
 
     const subHist = createCollapsibleSubSection('HISTORICAL TIMELINE (20 EVENTS)', false);
     subHist.content.id = 'timeline-hist';
-    subHist.content.className = 'timeline';
+    subHist.content.className = 'timeline margin-top-md';
 
     const subOnce = createCollapsibleSubSection('ONCE-IN-A-LIFETIME EVENTS');
     subOnce.content.id = 'timeline-once';
@@ -312,20 +321,21 @@ function renderEventsLived() {
     subInv.content.id = 'timeline-inv';
     subInv.content.className = 'data-list';
 
-    card.appendChild(subHist.container);
-    card.appendChild(subOnce.container);
-    card.appendChild(subPos.container);
-    card.appendChild(subInv.container);
+    mainCard.appendChild(subHist.container);
+    mainCard.appendChild(subOnce.container);
+    mainCard.appendChild(subPos.container);
+    mainCard.appendChild(subInv.container);
 
-    content.appendChild(card);
+    content.appendChild(mainCard);
     elements.resultsSection.appendChild(container);
     renderLivedThroughData();
 }
 
 function renderTopMedia() {
     const { container, content } = createCollapsibleSection('TOP MEDIA YEAR BORN');
-    const card = document.createElement('div');
-    card.className = 'card';
+
+    const mainCard = document.createElement('div');
+    mainCard.className = 'card';
 
     const subTracks = createCollapsibleSubSection('TOP 10 TRACKS THAT WEEK', false);
     subTracks.content.id = 'top-songs';
@@ -339,11 +349,11 @@ function renderTopMedia() {
     subMovies.content.id = 'top-movies';
     subMovies.content.className = 'data-list';
 
-    card.appendChild(subTracks.container);
-    card.appendChild(subTV.container);
-    card.appendChild(subMovies.container);
+    mainCard.appendChild(subTracks.container);
+    mainCard.appendChild(subTV.container);
+    mainCard.appendChild(subMovies.container);
 
-    content.appendChild(card);
+    content.appendChild(mainCard);
     elements.resultsSection.appendChild(container);
     renderTopChartsData();
 }
