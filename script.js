@@ -233,13 +233,13 @@ function renderLiveStats() {
             <div class="large-value" id="val-seconds">-</div>
         </div>
         <div class="biometrics-grid">
+            <div class="mini-stat-box border-amber"><span class="val font-size-sm color-amber" id="val-born-day">-</span><span class="lbl">DAY BORN</span></div>
             <div class="mini-stat-box"><span class="val" id="val-years">-</span><span class="lbl">YRS</span></div>
             <div class="mini-stat-box"><span class="val" id="val-months">-</span><span class="lbl">MOS</span></div>
             <div class="mini-stat-box"><span class="val" id="val-weeks">-</span><span class="lbl">WKS</span></div>
             <div class="mini-stat-box"><span class="val" id="val-days">-</span><span class="lbl">DAYS</span></div>
             <div class="mini-stat-box"><span class="val" id="val-hours">-</span><span class="lbl">HRS</span></div>
             <div class="mini-stat-box"><span class="val" id="val-minutes">-</span><span class="lbl">MINS</span></div>
-            <div class="mini-stat-box col-span-2 border-amber"><span class="val font-size-sm color-amber" id="val-born-day">-</span><span class="lbl">DAY BORN</span></div>
         </div>
     `;
     content.appendChild(card);
