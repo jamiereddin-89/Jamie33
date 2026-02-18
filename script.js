@@ -226,8 +226,8 @@ function renderResults() {
     const footer = document.createElement('div');
     footer.className = 'footer-actions';
     footer.innerHTML = `
-        <button class="reinit-btn" onclick="location.reload()" style="margin-bottom: 12px;"><span>🔄</span> NEW ANALYSIS</button>
-        <button class="reinit-btn" id="download-pdf-btn" style="background: var(--accent-cyan);"><span>📄</span> DOWNLOAD PDF SUMMARY</button>
+        <button class="reinit-btn margin-bottom-md" onclick="location.reload()"><span>🔄</span> NEW ANALYSIS</button>
+        <button class="reinit-btn btn-cyan" id="download-pdf-btn"><span>📄</span> DOWNLOAD PDF SUMMARY</button>
     `;
     elements.resultsSection.appendChild(footer);
 
