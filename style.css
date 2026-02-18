@@ -233,9 +233,6 @@ header {
     font-size: 0.75rem;
 }
 
-.data-list {
-    /* Styles unified with .card above */
-}
 
 .list-item {
     display: flex;
@@ -314,9 +311,6 @@ header {
     margin: 32px 16px;
 }
 
-.reinit-btn {
-    /* Styles unified with .btn-primary above */
-}
 
 /* Form Styles */
 .input-screen {
@@ -379,9 +373,6 @@ header {
 
 .hidden { display: none !important; }
 
-.stellar-card {
-    /* Styles unified with .card above */
-}
 
 .stellar-title {
     font-size: 1.4rem;
